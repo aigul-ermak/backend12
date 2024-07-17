@@ -46,4 +46,11 @@ As an authenticated user, I want to like or dislike a post to express my emotion
 **Alternative Scenario:**
 1. Steps 1-2 of the main scenario.
 2. The authenticated user dislikes the post.
-3. The system updates the number of dislikes and hi
+3. The system updates the number of dislikes and highlights the "Dislike" attribute.
+   - The user sees their dislike, which they placed on the post (the attribute is highlighted).
+
+**Notes:**
+- Ensure that only authenticated users can like or dislike posts.
+- The UI should clearly indicate which posts have been liked or disliked by the user.
+- The backend should handle the like/dislike logic and update the post status accordingly.
+- Refer to the Swagger API documentation for detailed endpoint usage and parameters.
