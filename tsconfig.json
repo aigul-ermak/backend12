@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "rootDirs": ["./src", "./src/types"],
+    "outDir": "./dist",
+    "strict": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.test.ts","__tests__/*"
+  ],
+  "files": ["./src/types/index.d.ts"] //path (e.g.: "src/types/index.d.ts")
+}
