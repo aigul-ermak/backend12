@@ -35,6 +35,6 @@ postRouter.post('/:id/comments', authBearerMiddleware, mongoIdInParamValidation(
 
 postRouter.put('/:id', authMiddleware, postValidation(), postController.updatePost.bind(postController));
 
-postRouter.put('/:id/like-status', postController.createLikeToPost.bind(postController));
+postRouter.put('/:id/like-status', likeStatusValidation(), postController.createLikeToPost.bind(postController));
 
 postRouter.delete('/:id', authMiddleware, mongoIdInParamValidation(), postController.deletePost.bind(postController));

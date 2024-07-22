@@ -109,7 +109,7 @@ export class CommentController {
         //     return;
         // }
 
-        let isCommentStatusUpdated = await this.likeService.createStatus(userId, likeStatus, comment.id);
+        let isCommentStatusUpdated = await this.likeService.createCommentStatus(userId, likeStatus, comment.id);
 
         if (!isCommentStatusUpdated) {
             res.sendStatus(404);

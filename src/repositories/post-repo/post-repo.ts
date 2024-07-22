@@ -1,9 +1,10 @@
 import {CreatePostData, SortPostType, UpdatePostData} from "../../types/post/input";
-import {OutputItemPostType, OutputPostType, PostDBType} from "../../types/post/output";
+import {NewsLike, OutputItemPostType, OutputPostType, PostDBType} from "../../types/post/output";
 import {ObjectId, WithId} from "mongodb";
 import {QueryBlogRepo} from "../blog-repo/query-blog-repo";
 import {PostModel} from "../../models/post";
 import {LikeModel} from "../../models/like";
+import {CommentModel} from "../../models/comment";
 
 export class PostRepo {
     //TODO any here
@@ -105,7 +106,6 @@ export class PostRepo {
         if (!post) {
             return null
         }
-        //return postMapper(post)
 
         return {
             id: post._id.toString(),
@@ -119,13 +119,7 @@ export class PostRepo {
                 likesCount: post.likesCount,
                 dislikesCount: post.dislikesCount,
                 myStatus: "None",
-                newestLikes: [
-                    {
-                        addedAt: "",
-                        userId: "",
-                        login: ""
-                    }
-                ]
+                newestLikes: [] as NewsLike[]
             }
         };
     }
@@ -189,5 +183,30 @@ export class PostRepo {
         const res = await PostModel.deleteOne({_id: new ObjectId(id)});
 
         return !!res.deletedCount;
+    }
+
+    async incrementLikeCount(id: string) {
+        await PostModel.updateOne({_id: new ObjectId(id)}, {
+            $inc: {likesCount: 1}
+        });
+    }
+
+
+    async decrementLikeCount(id: string) {
+        await PostModel.updateOne({_id: new ObjectId(id)}, {
+            $inc: {likesCount: -1}
+        });
+    }
+
+    async incrementDislikeCount(id: string) {
+        await PostModel.updateOne({_id: new ObjectId(id)}, {
+            $inc: {dislikesCount: 1}
+        });
+    }
+
+    async decrementDislikeCount(id: string) {
+        await PostModel.updateOne({_id: new ObjectId(id)}, {
+            $inc: {dislikesCount: -1}
+        });
     }
 }

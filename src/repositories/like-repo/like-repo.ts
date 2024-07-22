@@ -6,7 +6,7 @@ import {BlogModel} from "../../models/blog";
 import {LIKE_STATUS, LikeDBModel, LikeType} from "../../types/like/output";
 
 
-export class LikeCommentRepo {
+export class LikeRepo {
 
     async createLike(data: LikeType) {
         const res = await LikeModel.create(data);

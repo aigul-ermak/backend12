@@ -2,12 +2,12 @@ import {QueryCommentRepo} from "../repositories/comment-repo/query-comment-repo"
 import {OutputUserItemType} from "../types/user/output";
 import {CommentDBType, OutputItemCommentType, SortCommentType} from "../types/comment/output";
 import {CommentRepo} from "../repositories/comment-repo/comment-repo";
-import {LikeCommentRepo} from "../repositories/like-repo/like-comment-repo";
+import {LikeRepo} from "../repositories/like-repo/like-repo";
 import {ObjectId} from "mongodb";
 
 export class CommentService {
 
-    constructor(protected commentRepo: CommentRepo, protected likeCommentRepo: LikeCommentRepo) {
+    constructor(protected commentRepo: CommentRepo, protected likeCommentRepo: LikeRepo) {
     }
 
     async updateComment(commentId: string, contentData: CommentDBType) {

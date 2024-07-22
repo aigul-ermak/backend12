@@ -10,15 +10,11 @@ import {Params} from "../routes/videos-router";
 import {Request, Response} from "express";
 import {OutputItemPostType, OutputPostType, PostDBType} from "../types/post/output";
 import {OutputCommentType, OutputItemCommentType, SortCommentType} from "../types/comment/output";
-import {QueryCommentRepo} from "../repositories/comment-repo/query-comment-repo";
 import {CommentService} from "../services/comment-service";
-import {QueryPostRepo} from "../repositories/post-repo/query-post-repo";
 import {SortPostType} from "../types/post/input";
 import {jwtService} from "../services/jwt-sevice";
 import {LIKE_STATUS, LikeDBModel} from "../types/like/output";
 import {LikeCommentService} from "../services/like-comment-service";
-import {AuthService} from "../services/auth-service";
-import {UserService} from "../services/user-service";
 
 export class PostController {
     constructor(protected postService: PostService, protected commentService: CommentService,
@@ -72,16 +68,13 @@ export class PostController {
 
         post.extendedLikesInfo.myStatus = myStatus;
 
-        const user = await this.userService.findUserById(userId);
-        const newestLikes = await this.likeService.getNewestLikes(post.id);
 
-        const formattedNewestLikes = newestLikes.map(like => ({
+        let likes = await this.likeService.getNewestLikes(post.id);
+        post.newestLikes = likes.length === 0 ? [] : likes.map(like => ({
             addedAt: like.createdAt,
             userId: like.userId,
-            login: user?.accountData.login,
+            login: like.login,
         }));
-
-        //post.newestLikes = formattedNewestLikes;
 
         if (post) {
             res.status(200).send(post)
@@ -183,7 +176,7 @@ export class PostController {
             return;
         }
 
-        let isPostStatusUpdated = await this.likeService.createStatus(userId, likeStatus, post.id);
+        let isPostStatusUpdated = await this.likeService.createPostStatus(userId, likeStatus, post.id);
 
         if (!isPostStatusUpdated) {
             res.sendStatus(404);

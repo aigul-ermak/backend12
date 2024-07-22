@@ -12,21 +12,21 @@ import {BlogController} from "./controllers/blogController";
 import {PostRepo} from "./repositories/post-repo/post-repo";
 import {PostService} from "./services/post-service";
 import {PostController} from "./controllers/postController";
-import {LikeCommentRepo} from "./repositories/like-repo/like-comment-repo";
+import {LikeRepo} from "./repositories/like-repo/like-repo";
 import {LikeCommentService} from "./services/like-comment-service";
 
 const userRepo = new UserRepo();
 const commentRepo = new CommentRepo();
 const blogRepo = new BlogRepo();
 const postRepo = new PostRepo();
-const likeCommentRepo = new LikeCommentRepo();
+const likeCommentRepo = new LikeRepo();
 
 export const userService = new UserService(userRepo);
 const authService = new AuthService(userRepo);
 const commentService = new CommentService(commentRepo, likeCommentRepo);
 const blogService = new BlogService(blogRepo, postRepo);
 const postService = new PostService(postRepo, blogRepo);
-const likeService = new LikeCommentService(likeCommentRepo, commentRepo, userRepo);
+const likeService = new LikeCommentService(likeCommentRepo, commentRepo, userRepo, postRepo);
 
 
 export const userController = new UserController(userService);

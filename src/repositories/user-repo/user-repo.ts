@@ -1,8 +1,9 @@
 import {OutputUserItemType, OutputUsersType, UserDBType} from "../../types/user/output";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {UserModel} from "../../models/user";
 import {SessionModel} from "../../models/security";
 import bcrypt from "bcrypt";
+import {userMapper} from "../../types/user/mapper";
 
 export class UserRepo {
     //static async createUser(user: UserType) {
@@ -44,5 +45,15 @@ export class UserRepo {
                 }
             }
         );
+    }
+
+    async findUserById(id: string): Promise<OutputUserItemType | null> {
+        const user: WithId<UserDBType> | null = await UserModel.findOne({_id: new ObjectId(id)})
+
+        if (!user) {
+            return null
+        }
+
+        return userMapper(user)
     }
 }
