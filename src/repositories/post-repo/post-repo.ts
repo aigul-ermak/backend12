@@ -5,6 +5,7 @@ import {QueryBlogRepo} from "../blog-repo/query-blog-repo";
 import {PostModel} from "../../models/post";
 import {LikeModel} from "../../models/like";
 import {LikeRepo} from "../like-repo/like-repo";
+import {LIKE_STATUS} from "../../types/like/output";
 
 export class PostRepo {
     //TODO any here
@@ -41,7 +42,7 @@ export class PostRepo {
     }
 
 
-    async getAllPosts(sortData: SortPostType): Promise<OutputPostType> {
+    async getAllPosts(sortData: SortPostType, userId?:string): Promise<OutputPostType> {
 
         const sortDirection = sortData.sortDirection ?? 'desc'
         const sortBy = sortData.sortBy ?? 'createdAt'
@@ -59,14 +60,19 @@ export class PostRepo {
 
 
         const totalCount = await PostModel.countDocuments(filter);
-        const userId = "";
+        //const userId = "";
         const pageCount = Math.ceil(totalCount / +pageSize);
 
         const items: any[] = await Promise.all(posts.map(async (post) => {
-            const postLike = await LikeModel.findOne({parentId: post._id, userId: userId});
-            const status = postLike ? postLike.status : 'None';
+            // let myStatus = 'None';
+            // if(userId) {
+                const postLike = await LikeModel.findOne({parentId: post._id, userId: userId});
+                const myStatus = postLike ? postLike.status : 'None';
+            // }
 
-            let newestLikes = await LikeModel.find({ parentId: post.id })
+            //const status = postLike!.status ;
+
+            let newestLikes = await LikeModel.find({ parentId: post.id ,  status: LIKE_STATUS.LIKE})
                 .sort({ createdAt: -1 })
                 .limit(3);
             const formattedNewestLikes = newestLikes.length === 0 ? [] : newestLikes.map(like => ({
@@ -86,7 +92,7 @@ export class PostRepo {
                 extendedLikesInfo: {
                     likesCount: post.likesCount,
                     dislikesCount: post.dislikesCount,
-                    myStatus: status,
+                    myStatus: myStatus,
                     newestLikes: formattedNewestLikes,
                 }
             };
@@ -98,7 +104,6 @@ export class PostRepo {
             pageSize: +pageSize,
             totalCount: totalCount,
             items: items,
-            //items: posts.map(postMapper)
         }
     }
 
@@ -127,7 +132,7 @@ export class PostRepo {
         };
     }
 
-    async getPostsByBlogId(blogId: string, sortData: SortPostType) {
+    async getPostsByBlogId(blogId: string, sortData: SortPostType, userId?:string) {
 
         const sortDirection = sortData.sortDirection ?? 'desc'
         const sortBy = sortData.sortBy ?? 'createdAt'
@@ -145,10 +150,19 @@ export class PostRepo {
         const totalCount = await PostModel.countDocuments({blogId: blogId});
 
         const pageCount = Math.ceil(totalCount / +pageSize);
-        const userId = "";
+
         const items: any[] = await Promise.all(posts.map(async (post) => {
-            const postComment = await LikeModel.findOne({parentId: post._id, userId: userId});
-            const status = postComment ? postComment.status : 'None';
+            const postLike = await LikeModel.findOne({parentId: post.id, userId: userId});
+            const status = postLike ? postLike.status : 'None';
+
+            let newestLikes = await LikeModel.find({ parentId: post.id, status: LIKE_STATUS.LIKE })
+                .sort({ createdAt: -1 })
+                .limit(3);
+            const formattedNewestLikes = newestLikes.length === 0 ? [] : newestLikes.map(like => ({
+                addedAt: like.createdAt,
+                userId: like.userId,
+                login: like.login,
+            }));
 
             return {
                 id: post._id.toString(),
@@ -162,13 +176,7 @@ export class PostRepo {
                     likesCount: post.likesCount,
                     dislikesCount: post.dislikesCount,
                     myStatus: status,
-                    newestLikes: [
-                        {
-                            addedAt: "",
-                            userId: "",
-                            login: "",
-                        }
-                    ]
+                    newestLikes: formattedNewestLikes,
                 }
             };
         }));

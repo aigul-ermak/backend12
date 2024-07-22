@@ -56,12 +56,12 @@ export class PostService {
         return await this.postRepo.getPostById(id);
     }
 
-    async getAllPosts(sortData: SortPostType) {
-        return await this.postRepo.getAllPosts(sortData);
+    async getAllPosts(sortData: SortPostType, userId?: string) {
+        return await this.postRepo.getAllPosts(sortData, userId);
     }
 
-    async getPostsByBlogId(id: string, sortData: SortPostType) {
-        return await this.postRepo.getPostsByBlogId(id, sortData);
+    async getPostsByBlogId(id: string, sortData: SortPostType, userId?:string) {
+        return await this.postRepo.getPostsByBlogId(id, sortData, userId);
     }
 
 

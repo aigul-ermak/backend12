@@ -40,7 +40,7 @@ export class PostController {
             res.status(401)
         }
 
-        const posts: OutputPostType = await this.postService.getAllPosts(sortData)
+        const posts: OutputPostType = await this.postService.getAllPosts(sortData, userId)
         res.status(200).send(posts)
     }
 
@@ -156,24 +156,22 @@ export class PostController {
             return;
         }
 
-        // Check if the access token is provided
-        const authorizationHeader = req.headers.authorization;
-        if (!authorizationHeader) {
-            res.sendStatus(401); // Unauthorized
-            return;
-        }
+        // if (!req.headers.authorization) {
+        //     res.sendStatus(401);
+        //     return;
+        // }
 
-        const accessToken = authorizationHeader.split(' ')[1];
+        const accessToken = req.headers.authorization!.split(' ')[1];
         if (!accessToken) {
-            res.sendStatus(401); // Unauthorized
-            return;
+            res.sendStatus(401);
+            // return;
         }
 
         // // Verify the token and get user ID
         const userId = await jwtService.getUserIdByToken(accessToken);
         if (!userId) {
-            res.sendStatus(401); // Unauthorized
-            return;
+            res.sendStatus(401);
+            // return;
         }
 
         let isPostStatusUpdated = await this.likeService.createPostStatus(userId, likeStatus, post.id);

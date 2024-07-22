@@ -72,7 +72,18 @@ export class BlogController {
             return
         }
 
-        const posts: OutputPostType = await this.postService.getPostsByBlogId(id, sortData);
+        let userId;
+
+        if (req.headers.authorization) {
+            const accessToken = req.headers.authorization.split(' ')[1];
+            userId = await jwtService.getUserIdByToken(accessToken);
+        }
+
+        if (!userId) {
+            res.status(401)
+        }
+
+        const posts: OutputPostType = await this.postService.getPostsByBlogId(id, sortData, userId);
 
         if (!posts) {
             res.sendStatus(204)

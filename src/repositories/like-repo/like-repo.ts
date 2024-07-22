@@ -31,8 +31,8 @@ export class LikeRepo {
     }
 
     async getNewestLikes(parentId: string) {
-        return await LikeModel.find({ parentId: parentId })
-            .sort({ createdAt: -1 })
+        return LikeModel.find({parentId: parentId, status: LIKE_STATUS.LIKE})
+            .sort({createdAt: -1})
             .limit(3);
     }
 

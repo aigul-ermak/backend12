@@ -89,9 +89,9 @@ export class LikeCommentService {
                 }
 
                 if (likeStatus === LIKE_STATUS.LIKE) {
-                    await this.commentRepo.incrementLikeCount(parentId);
+                    await this.postRepo.incrementLikeCount(parentId);
                 } else if (likeStatus === LIKE_STATUS.DISLIKE) {
-                    await this.commentRepo.incrementDislikeCount(parentId);
+                    await this.postRepo.incrementDislikeCount(parentId);
                 }
             }
             like!.status = likeStatus;
