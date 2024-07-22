@@ -6,6 +6,7 @@ import {
     mongoIdInParamValidation
 } from "../validators/blog-validator";
 import {blogController} from "../composition-root";
+import {authBearerMiddleware} from "../middleware/auth/auth-bearer-middleware";
 
 
 export const blogRouter: Router = Router({})

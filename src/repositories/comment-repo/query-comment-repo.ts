@@ -2,7 +2,7 @@ import {ObjectId, WithId} from "mongodb";
 import {commentMapper} from "../../types/comment/mapper";
 import {CommentDBType, OutputItemCommentType, SortCommentType} from "../../types/comment/output";
 import {CommentModel} from "../../models/comment";
-import {LikeCommentModel} from "../../models/like";
+import {LikeModel} from "../../models/like";
 
 
 export class QueryCommentRepo {
@@ -34,7 +34,7 @@ export class QueryCommentRepo {
             //.toArray();
 
         const items: OutputItemCommentType[] = await Promise.all(comments.map(async (comment) => {
-            const likeComment = await LikeCommentModel.findOne({ parentId: comment._id });
+            const likeComment = await LikeModel.findOne({ parentId: comment._id });
             const status = likeComment ? likeComment.status : 'None';
 
             return {

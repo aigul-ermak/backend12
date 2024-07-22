@@ -1,5 +1,3 @@
-import {OutputItemPostType, PostDBType} from "../types/post/output";
-import {postMapper} from "../types/post/mapper";
 import {ObjectId, WithId} from "mongodb";
 import {CreatePostData, UpdatePostData} from "../types/post/input";
 import {BlogRepository} from "./blog-repository";

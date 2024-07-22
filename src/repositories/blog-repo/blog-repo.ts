@@ -1,13 +1,9 @@
-import {CreateBlogData, SortDataType, UpdateBlogData} from "../../types/blog/input";
+import { SortDataType, UpdateBlogData} from "../../types/blog/input";
 import {BlogDBType, OutputBlogType, OutputItemBlogType} from "../../types/blog/output";
-import mongoose from "mongoose";
-import {BlogModel, blogSchema} from "../../models/blog";
-import {ObjectId, WithId} from "mongodb";
+import {BlogModel} from "../../models/blog";
+import {ObjectId} from "mongodb";
 import {blogMapper} from "../../types/blog/mapper";
-import {SortPostType} from "../../types/post/input";
-import {OutputItemPostType, OutputPostType, PostDBType} from "../../types/post/output";
-import {PostModel} from "../../models/post";
-import {postMapper} from "../../types/post/mapper";
+
 
 
 export class BlogRepo {

@@ -11,7 +11,7 @@ import {SortPostType} from "../types/post/input";
 import {mongoIdInParamValidation} from "../validators/blog-validator";
 import {QueryCommentRepo} from "../repositories/comment-repo/query-comment-repo";
 import {CommentService} from "../services/comment-service";
-import {commentValidation} from "../validators/comment-validator";
+import {commentValidation, likeStatusValidation} from "../validators/comment-validator";
 import {OutputCommentType, OutputItemCommentType, SortCommentType} from "../types/comment/output";
 import {authBearerMiddleware} from "../middleware/auth/auth-bearer-middleware";
 import {postExistsMiddleware} from "../middleware/comment/post-middleware";
@@ -34,5 +34,7 @@ postRouter.post('/', authMiddleware, postValidation(), postController.createPost
 postRouter.post('/:id/comments', authBearerMiddleware, mongoIdInParamValidation(), postExistsMiddleware, commentValidation(), postController.createComment.bind(postController))
 
 postRouter.put('/:id', authMiddleware, postValidation(), postController.updatePost.bind(postController));
+
+postRouter.put('/:id/like-status', postController.createLikeToPost.bind(postController));
 
 postRouter.delete('/:id', authMiddleware, mongoIdInParamValidation(), postController.deletePost.bind(postController));

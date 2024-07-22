@@ -8,16 +8,21 @@ import {
 } from "../types/common";
 import {Params} from "../routes/videos-router";
 import {Request, Response} from "express";
-import {OutputPostType, PostDBType} from "../types/post/output";
+import {OutputItemPostType, OutputPostType, PostDBType} from "../types/post/output";
 import {OutputCommentType, OutputItemCommentType, SortCommentType} from "../types/comment/output";
 import {QueryCommentRepo} from "../repositories/comment-repo/query-comment-repo";
 import {CommentService} from "../services/comment-service";
 import {QueryPostRepo} from "../repositories/post-repo/query-post-repo";
 import {SortPostType} from "../types/post/input";
 import {jwtService} from "../services/jwt-sevice";
+import {LIKE_STATUS, LikeDBModel} from "../types/like/output";
+import {LikeCommentService} from "../services/like-comment-service";
+import {AuthService} from "../services/auth-service";
+import {UserService} from "../services/user-service";
 
 export class PostController {
-    constructor(protected postService: PostService, protected commentService: CommentService) {
+    constructor(protected postService: PostService, protected commentService: CommentService,
+                protected likeService: LikeCommentService) {
     }
 
     async getAllPosts(req: RequestTypeWithQuery<SortPostType>, res: Response) {
@@ -28,14 +33,55 @@ export class PostController {
             pageSize: req.query.pageSize
         }
 
+        let userId;
+
+        if (req.headers.authorization) {
+            const accessToken = req.headers.authorization.split(' ')[1];
+            userId = await jwtService.getUserIdByToken(accessToken);
+        }
+
+        if (!userId) {
+            res.status(401)
+        }
 
         const posts: OutputPostType = await this.postService.getAllPosts(sortData)
         res.status(200).send(posts)
     }
+
     async getPostById(req: RequestWithParams<Params>, res: Response<PostDBType>) {
         const id: string = req.params.id
+        //TODO type??
+        //const post: PostDBType | null = await this.postService.getPostById(id)
+        const post: any | null = await this.postService.getPostById(id)
 
-        const post: PostDBType | null = await this.postService.getPostById(id)
+        let userId;
+
+        let myStatus = 'None';
+
+        if (req.headers.authorization) {
+            const accessToken = req.headers.authorization.split(' ')[1];
+            userId = await jwtService.getUserIdByToken(accessToken);
+        }
+
+        if (userId) {
+            const like: LikeDBModel | null = await this.likeService.getLike(post.id, userId);
+            if (like) {
+                myStatus = like.status;
+            }
+        }
+
+        post.extendedLikesInfo.myStatus = myStatus;
+
+        const user = await this.userService.findUserById(userId);
+        const newestLikes = await this.likeService.getNewestLikes(post.id);
+
+        const formattedNewestLikes = newestLikes.map(like => ({
+            addedAt: like.createdAt,
+            userId: like.userId,
+            login: user?.accountData.login,
+        }));
+
+        //post.newestLikes = formattedNewestLikes;
 
         if (post) {
             res.status(200).send(post)
@@ -45,7 +91,9 @@ export class PostController {
         }
     }
 
-    async getCommentByPostId(req: RequestTypeWithQueryAndParams<{ id: string }, SortCommentType>, res: Response<OutputCommentType>) {
+    async getCommentByPostId(req: RequestTypeWithQueryAndParams<{
+        id: string
+    }, SortCommentType>, res: Response<OutputCommentType>) {
         const postId: string = req.params.id
 
         const sortData: SortCommentType = {
@@ -54,8 +102,9 @@ export class PostController {
             pageNumber: req.query.pageNumber,
             pageSize: req.query.pageSize
         }
-
-        const post: PostDBType | null = await this.postService.getPostById(postId)
+//TODO type??
+        //const post: PostDBType | null = await this.postService.getPostById(postId)
+        const post: any | null = await this.postService.getPostById(postId)
 
         let userId;
         let myStatus = 'None';
@@ -90,14 +139,59 @@ export class PostController {
             res.sendStatus(404);
             return;
         }
+        //TODO type??
+        //const newPost: PostDBType | null = await this.postService.getPostById(postId);
+        const newPost: any | null = await this.postService.getPostById(postId);
 
-        const newPost: PostDBType | null = await this.postService.getPostById(postId);
         if (newPost) {
             res.status(201).send(newPost);
         } else {
             res.sendStatus(404);
             return
         }
+    }
+
+    async createLikeToPost(req: Request, res: Response) {
+        const likeStatus: LIKE_STATUS = req.body.likeStatus
+
+        const postId: string = req.params.id;
+
+        const post: OutputItemPostType | null = await this.postService.getPostById(postId);
+
+        if (!post) {
+            res.sendStatus(404);
+            return;
+        }
+
+        // Check if the access token is provided
+        const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader) {
+            res.sendStatus(401); // Unauthorized
+            return;
+        }
+
+        const accessToken = authorizationHeader.split(' ')[1];
+        if (!accessToken) {
+            res.sendStatus(401); // Unauthorized
+            return;
+        }
+
+        // // Verify the token and get user ID
+        const userId = await jwtService.getUserIdByToken(accessToken);
+        if (!userId) {
+            res.sendStatus(401); // Unauthorized
+            return;
+        }
+
+        let isPostStatusUpdated = await this.likeService.createStatus(userId, likeStatus, post.id);
+
+        if (!isPostStatusUpdated) {
+            res.sendStatus(404);
+            return;
+        }
+
+        res.sendStatus(204);
+
     }
 
     async createComment(req: Request, res: Response) {

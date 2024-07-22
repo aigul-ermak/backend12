@@ -1,6 +1,6 @@
 import {CreatePostData, SortPostType, UpdatePostData} from "../types/post/input";
 import {PostRepo} from "../repositories/post-repo/post-repo";
-import {PostDBType} from "../types/post/output";
+import {NewsLike, OutputCreatePostType, PostDBType} from "../types/post/output";
 import {BlogRepo} from "../repositories/blog-repo/blog-repo";
 
 export class PostService {
@@ -16,10 +16,16 @@ export class PostService {
             throw new Error('Blog not found');
         }
 
-        const newPost: PostDBType = {
+        const newPost: OutputCreatePostType = {
             ...newData,
             blogName: blog.name,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: "None",
+                newestLikes: [] as NewsLike[],
+            }
         }
 
         const postId = await this.postRepo.createPost(newPost);
@@ -46,15 +52,15 @@ export class PostService {
         return await this.postRepo.deletePost(id);
     }
 
-    async getPostById(id: string){
+    async getPostById(id: string) {
         return await this.postRepo.getPostById(id);
     }
 
-    async getAllPosts(sortData: SortPostType){
+    async getAllPosts(sortData: SortPostType) {
         return await this.postRepo.getAllPosts(sortData);
     }
 
-    async getPostsByBlogId(id: string, sortData: SortPostType){
+    async getPostsByBlogId(id: string, sortData: SortPostType) {
         return await this.postRepo.getPostsByBlogId(id, sortData);
     }
 

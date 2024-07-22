@@ -13,6 +13,7 @@ import {OutputItemPostType, OutputPostType} from "../types/post/output";
 import {BlogDBType, OutputBlogType, OutputItemBlogType} from "../types/blog/output";
 import {SortPostType} from "../types/post/input";
 import {PostService} from "../services/post-service";
+import {jwtService} from "../services/jwt-sevice";
 
 
 export class BlogController {
@@ -26,6 +27,17 @@ export class BlogController {
             sortDirection: req.query.sortDirection,
             pageNumber: req.query.pageNumber,
             pageSize: req.query.pageSize
+        }
+
+        let userId;
+
+        if (req.headers.authorization) {
+            const accessToken = req.headers.authorization.split(' ')[1];
+            userId = await jwtService.getUserIdByToken(accessToken);
+        }
+
+        if(!userId) {
+            res.status(401)
         }
 
         const blogs: OutputBlogType = await this.blogService.getAllBlogs(sortData)

@@ -9,7 +9,9 @@ export type LikeDBModel = {
     id: string
     status: LIKE_STATUS,
     userId: string,
-    parentId: string
+    parentId: string,
+    login: string,
+    createdAt: string
 }
 
 export type LikeType = {

@@ -42,13 +42,10 @@ export class CommentController {
         }
 
         const comment: OutputItemCommentType | null = await this.commentService.getCommentById(id);
-        //const comment: OutputItemCommentType | null = await this.commentService.getCommentByIdUserId(id);
 
         if (!comment) {
             return res.sendStatus(404);
         }
-
-
 
         if (userId) {
             const like: LikeDBModel | null = await this.likeService.getLike(comment.id, userId);
@@ -90,7 +87,7 @@ export class CommentController {
         res.sendStatus(204);
     }
 
-    async makeLike(req: Request, res: Response) {
+    async createLikeToComment(req: Request, res: Response) {
 
         const likeStatus: LIKE_STATUS = req.body.likeStatus
 
@@ -112,7 +109,7 @@ export class CommentController {
         //     return;
         // }
 
-        let isCommentStatusUpdated = await this.likeService.makeStatus(userId, likeStatus, comment.id);
+        let isCommentStatusUpdated = await this.likeService.createStatus(userId, likeStatus, comment.id);
 
         if (!isCommentStatusUpdated) {
             res.sendStatus(404);

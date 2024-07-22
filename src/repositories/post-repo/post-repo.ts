@@ -1,12 +1,9 @@
 import {CreatePostData, SortPostType, UpdatePostData} from "../../types/post/input";
 import {OutputItemPostType, OutputPostType, PostDBType} from "../../types/post/output";
 import {ObjectId, WithId} from "mongodb";
-import {BlogDBType} from "../../types/blog/output";
 import {QueryBlogRepo} from "../blog-repo/query-blog-repo";
 import {PostModel} from "../../models/post";
-import {PostService} from "../../services/post-service";
-import {BlogModel} from "../../models/blog";
-import {postMapper} from "../../types/post/mapper";
+import {LikeModel} from "../../models/like";
 
 export class PostRepo {
     //TODO any here
@@ -14,15 +11,13 @@ export class PostRepo {
 
         const res = await PostModel.create(newData);
         return res._id.toString();
-        //TODO delete
-        //return res.insertedId.toString();
     }
 
     async createPost(data: CreatePostData): Promise<string | null> {
         try {
             const res = await PostModel.create(data);
             return res._id.toString();
-        } catch(e) {
+        } catch (e) {
             console.log(e);
             return null;
         }
@@ -56,35 +51,86 @@ export class PostRepo {
 
         const posts = await PostModel
             .find(filter)
-            .sort({[sortBy]: sortDirection === 'desc' ? -1: 1})
+            .sort({[sortBy]: sortDirection === 'desc' ? -1 : 1})
             .skip((pageNumber - 1) * +pageSize)
             .limit(+pageSize)
             .exec();
-        //.toArray();
+
 
         const totalCount = await PostModel.countDocuments(filter);
-
+        const userId = "";
         const pageCount = Math.ceil(totalCount / +pageSize);
+
+        const items: any[] = await Promise.all(posts.map(async (post) => {
+            const postLike = await LikeModel.findOne({parentId: post._id, userId: userId});
+            const status = postLike ? postLike.status : 'None';
+
+            return {
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    likesCount: post.likesCount,
+                    dislikesCount: post.dislikesCount,
+                    myStatus: status,
+                    newestLikes: [
+                        {
+                            addedAt: "",
+                            userId: "",
+                            login: "",
+                        }
+                    ]
+                }
+            };
+        }));
 
         return {
             pagesCount: pageCount,
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount: totalCount,
-            items: posts.map(postMapper)
+            items: items,
+            //items: posts.map(postMapper)
         }
     }
 
     async getPostById(id: string): Promise<OutputItemPostType | null> {
+
         const post: WithId<PostDBType> | null = await PostModel.findOne({_id: new ObjectId(id)})
 
         if (!post) {
             return null
         }
-        return postMapper(post)
+        //return postMapper(post)
+
+        return {
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId,
+            blogName: post.blogName,
+            createdAt: post.createdAt,
+            extendedLikesInfo: {
+                likesCount: post.likesCount,
+                dislikesCount: post.dislikesCount,
+                myStatus: "None",
+                newestLikes: [
+                    {
+                        addedAt: "",
+                        userId: "",
+                        login: ""
+                    }
+                ]
+            }
+        };
     }
 
-    async getPostsByBlogId(blogId: string, sortData:SortPostType ) {
+    async getPostsByBlogId(blogId: string, sortData: SortPostType) {
 
         const sortDirection = sortData.sortDirection ?? 'desc'
         const sortBy = sortData.sortBy ?? 'createdAt'
@@ -93,7 +139,7 @@ export class PostRepo {
 
         const posts = await PostModel
             .find({blogId: blogId})
-            .sort({[sortBy]: sortDirection === 'desc' ? -1: 1})
+            .sort({[sortBy]: sortDirection === 'desc' ? -1 : 1})
             .skip((pageNumber - 1) * +pageSize)
             .limit(+pageSize)
             .exec();
@@ -102,17 +148,44 @@ export class PostRepo {
         const totalCount = await PostModel.countDocuments({blogId: blogId});
 
         const pageCount = Math.ceil(totalCount / +pageSize);
+        const userId = "";
+        const items: any[] = await Promise.all(posts.map(async (post) => {
+            const postComment = await LikeModel.findOne({parentId: post._id, userId: userId});
+            const status = postComment ? postComment.status : 'None';
+
+            return {
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    likesCount: post.likesCount,
+                    dislikesCount: post.dislikesCount,
+                    myStatus: status,
+                    newestLikes: [
+                        {
+                            addedAt: "",
+                            userId: "",
+                            login: "",
+                        }
+                    ]
+                }
+            };
+        }));
 
         return {
             pagesCount: pageCount,
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount: totalCount,
-            items: posts.map(postMapper)
+            items: items
         }
     }
 
-     async deletePost(id: string): Promise<boolean> {
+    async deletePost(id: string): Promise<boolean> {
         const res = await PostModel.deleteOne({_id: new ObjectId(id)});
 
         return !!res.deletedCount;

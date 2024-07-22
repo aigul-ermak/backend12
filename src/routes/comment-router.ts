@@ -7,9 +7,9 @@ import {commentController} from "../composition-root";
 
 export const commentRouter: Router = Router({})
 
-commentRouter.get('/:id',  commentController.getCommentById.bind(commentController))
+commentRouter.get('/:id', commentController.getCommentById.bind(commentController))
 
-commentRouter.put('/:id/like-status', authBearerMiddleware, mongoIdInParamValidation(), likeStatusValidation(), commentController.makeLike.bind(commentController))
+commentRouter.put('/:id/like-status', authBearerMiddleware, mongoIdInParamValidation(), likeStatusValidation(), commentController.createLikeToComment.bind(commentController))
 
 commentRouter.put('/:id', authBearerMiddleware, mongoIdInParamValidation(), commentValidation(), commentController.updateComment.bind(commentController))
 

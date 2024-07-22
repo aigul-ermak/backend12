@@ -26,11 +26,11 @@ const authService = new AuthService(userRepo);
 const commentService = new CommentService(commentRepo, likeCommentRepo);
 const blogService = new BlogService(blogRepo, postRepo);
 const postService = new PostService(postRepo, blogRepo);
-const likeCommentService = new LikeCommentService(likeCommentRepo, commentRepo);
+const likeService = new LikeCommentService(likeCommentRepo, commentRepo, userRepo);
 
 
 export const userController = new UserController(userService);
 export const authController = new AuthController(authService, userService);
-export const commentController = new CommentController(commentService, likeCommentService );
+export const commentController = new CommentController(commentService, likeService );
 export const blogController = new BlogController(blogService, postService);
-export const postController = new PostController(postService, commentService);
+export const postController = new PostController(postService, commentService, likeService);

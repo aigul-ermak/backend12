@@ -1,4 +1,3 @@
-
 export type OutputItemPostType = {
     id: string,
     title: string,
@@ -6,7 +5,19 @@ export type OutputItemPostType = {
     content: string,
     blogId: string,
     blogName: string,
-    createdAt: string
+    createdAt: string,
+    extendedLikesInfo: {
+        likesCount: Number,
+        dislikesCount: Number,
+        myStatus: string,
+        newestLikes: [
+            {
+                addedAt: string,
+                userId: string,
+                login: string,
+            }
+        ]
+    }
 }
 
 export type OutputPostType = {
@@ -24,5 +35,26 @@ export type PostDBType = {
     content: string,
     blogId: string,
     blogName: string,
-    createdAt: string
+    createdAt: string,
+    likesCount: number,
+    dislikesCount: number,
+}
+
+export type NewsLike = { addedAt: string,
+    userId: string,
+    login: string,}
+
+export type OutputCreatePostType = {
+    title: string,
+    shortDescription: string,
+    content: string,
+    blogId: string,
+    blogName: string,
+    createdAt: string,
+    extendedLikesInfo: {
+        likesCount: Number,
+        dislikesCount: Number,
+        myStatus: string,
+        newestLikes:NewsLike[]
+    }
 }

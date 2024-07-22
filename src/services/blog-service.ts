@@ -1,7 +1,7 @@
 import {BlogRepo} from "../repositories/blog-repo/blog-repo";
 import {CreateBlogData, SortDataType, UpdateBlogData} from "../types/blog/input";
 import {PostRepo} from "../repositories/post-repo/post-repo";
-import {OutputItemPostType, PostDBType} from "../types/post/output";
+import {OutputCreatePostType, OutputItemPostType, PostDBType} from "../types/post/output";
 import {BlogDBType, OutputItemBlogType} from "../types/blog/output";
 
 export class BlogService {
@@ -40,11 +40,23 @@ export class BlogService {
             return null;
         }
 
-        const newPost: PostDBType = {
+        const newPost: OutputCreatePostType = {
             ...postData,
             blogId: blogId,
             blogName: blog.name,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            extendedLikesInfo: {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: "None",
+                newestLikes: [
+                    {
+                        addedAt: "",
+                        userId: "",
+                        login: ""
+                    }
+                ]
+            }
         }
 
         const postId: string = await this.postRepo.createPostToBlog(newPost)

@@ -1,8 +1,8 @@
 import {OutputItemPostType, OutputPostType, PostDBType} from "../../types/post/output";
-import {postMapper} from "../../types/post/mapper";
 import {ObjectId, WithId} from "mongodb";
 import {SortPostType} from "../../types/post/input";
 import {PostModel} from "../../models/post";
+import {LikeModel} from "../../models/like";
 
 export class QueryPostRepo {
     static async getAllPosts(sortData: SortPostType): Promise<OutputPostType> {
@@ -16,22 +16,49 @@ export class QueryPostRepo {
 
         const posts = await PostModel
             .find(filter)
-            .sort({[sortBy]: sortDirection === 'desc' ? -1: 1})
+            .sort({[sortBy]: sortDirection === 'desc' ? -1 : 1})
             .skip((pageNumber - 1) * +pageSize)
             .limit(+pageSize)
             .exec();
-            //.toArray();
+        //.toArray();
 
         const totalCount = await PostModel.countDocuments(filter);
 
         const pageCount = Math.ceil(totalCount / +pageSize);
+        const userId = "";
+        const items: any[] = await Promise.all(posts.map(async (post) => {
+            const postComment = await LikeModel.findOne({parentId: post._id, userId: userId});
+            const status = postComment ? postComment.status : 'None';
+
+            return {
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    likesCount: post.likesCount,
+                    dislikesCount: post.dislikesCount,
+                    myStatus: status,
+                    newestLikes: [
+                        {
+                            addedAt: "",
+                            userId: "",
+                            login: "",
+                        }
+                    ]
+                }
+            };
+        }));
 
         return {
             pagesCount: pageCount,
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount: totalCount,
-            items: posts.map(postMapper)
+            items: items,
         }
     }
 
@@ -41,10 +68,30 @@ export class QueryPostRepo {
         if (!post) {
             return null
         }
-        return postMapper(post)
+        return {
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId,
+            blogName: post.blogName,
+            createdAt: post.createdAt,
+            extendedLikesInfo: {
+                likesCount: post.likesCount,
+                dislikesCount: post.dislikesCount,
+                myStatus: "None",
+                newestLikes: [
+                    {
+                        addedAt: "",
+                        userId: "",
+                        login: "",
+                    }
+                ]
+            }
+        };
     }
 
-    static async getPostsByBlogId(blogId: string, sortData:SortPostType ) {
+    static async getPostsByBlogId(blogId: string, sortData: SortPostType) {
 
         const sortDirection = sortData.sortDirection ?? 'desc'
         const sortBy = sortData.sortBy ?? 'createdAt'
@@ -53,22 +100,49 @@ export class QueryPostRepo {
 
         const posts = await PostModel
             .find({blogId: blogId})
-            .sort({[sortBy]: sortDirection === 'desc' ? -1: 1})
+            .sort({[sortBy]: sortDirection === 'desc' ? -1 : 1})
             .skip((pageNumber - 1) * +pageSize)
             .limit(+pageSize)
             .exec();
-            //.toArray();
+        //.toArray();
 
         const totalCount = await PostModel.countDocuments({blogId: blogId});
 
         const pageCount = Math.ceil(totalCount / +pageSize);
+        const userId = "";
+        const items: any[] = await Promise.all(posts.map(async (post) => {
+            const postComment = await LikeModel.findOne({parentId: post._id, userId: userId});
+            const status = postComment ? postComment.status : 'None';
+
+            return {
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+                extendedLikesInfo: {
+                    likesCount: post.likesCount,
+                    dislikesCount: post.dislikesCount,
+                    myStatus: status,
+                    newestLikes: [
+                        {
+                            addedAt: "",
+                            userId: "",
+                            login: "",
+                        }
+                    ]
+                }
+            };
+        }));
 
         return {
             pagesCount: pageCount,
             page: +pageNumber,
             pageSize: +pageSize,
             totalCount: totalCount,
-            items: posts.map(postMapper)
+            items: items
         }
     }
 }

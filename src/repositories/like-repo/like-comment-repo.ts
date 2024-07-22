@@ -1,5 +1,5 @@
 import {CommentModel} from "../../models/comment";
-import {LikeCommentModel} from "../../models/like";
+import {LikeModel} from "../../models/like";
 import {ObjectId} from "mongodb";
 import {commentMapper} from "../../types/comment/mapper";
 import {BlogModel} from "../../models/blog";
@@ -9,12 +9,12 @@ import {LIKE_STATUS, LikeDBModel, LikeType} from "../../types/like/output";
 export class LikeCommentRepo {
 
     async createLike(data: LikeType) {
-        const res = await LikeCommentModel.create(data);
+        const res = await LikeModel.create(data);
         return res._id.toString();
     }
 
     async updateLike(id: string, updateData: any) {
-        const res = await LikeCommentModel.updateOne({_id: new ObjectId(id)}, {
+        const res = await LikeModel.updateOne({_id: new ObjectId(id)}, {
             $set: {
                 status: updateData.status,
                 userId: updateData.userId,
@@ -26,12 +26,18 @@ export class LikeCommentRepo {
     }
 
     async getLike(parentId: string, userId: string) {
-        const res = await LikeCommentModel.findOne({parentId: parentId, userId: userId});
+        const res = await LikeModel.findOne({parentId: parentId, userId: userId});
         return res;
     }
 
+    async getNewestLikes(parentId: string) {
+        return await LikeModel.find({ parentId: parentId })
+            .sort({ createdAt: -1 })
+            .limit(3);
+    }
+
     async checkLike(parentId: string, userId: string) {
-        const res = await LikeCommentModel.findOne({parentId: parentId, userId: userId}).lean();
+        const res = await LikeModel.findOne({parentId: parentId, userId: userId}).lean();
         return !!res;
     }
 
@@ -45,12 +51,12 @@ export class LikeCommentRepo {
 //     }
 
     async makeStatus(like: any) {
-        const res = await LikeCommentModel.create(like)
+        const res = await LikeModel.create(like)
         return res._id.toString();
     }
 
     async findLikeByCommentId(id: string) {
-        const like = await LikeCommentModel.findOne({_id: new ObjectId(id)})
+        const like = await LikeModel.findOne({_id: new ObjectId(id)})
 
         if (!like) {
             return null
