@@ -4,7 +4,7 @@ import {ObjectId, WithId} from "mongodb";
 import {QueryBlogRepo} from "../blog-repo/query-blog-repo";
 import {PostModel} from "../../models/post";
 import {LikeModel} from "../../models/like";
-import {CommentModel} from "../../models/comment";
+import {LikeRepo} from "../like-repo/like-repo";
 
 export class PostRepo {
     //TODO any here
@@ -66,6 +66,15 @@ export class PostRepo {
             const postLike = await LikeModel.findOne({parentId: post._id, userId: userId});
             const status = postLike ? postLike.status : 'None';
 
+            let newestLikes = await LikeModel.find({ parentId: post.id })
+                .sort({ createdAt: -1 })
+                .limit(3);
+            const formattedNewestLikes = newestLikes.length === 0 ? [] : newestLikes.map(like => ({
+                addedAt: like.createdAt,
+                userId: like.userId,
+                login: like.login,
+            }));
+
             return {
                 id: post._id.toString(),
                 title: post.title,
@@ -78,13 +87,7 @@ export class PostRepo {
                     likesCount: post.likesCount,
                     dislikesCount: post.dislikesCount,
                     myStatus: status,
-                    newestLikes: [
-                        {
-                            addedAt: "",
-                            userId: "",
-                            login: "",
-                        }
-                    ]
+                    newestLikes: formattedNewestLikes,
                 }
             };
         }));
