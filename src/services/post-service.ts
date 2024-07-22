@@ -64,12 +64,4 @@ export class PostService {
         return await this.postRepo.getPostsByBlogId(id, sortData, userId);
     }
 
-
-    // static async deleteBlog(postId: string) {
-    //     const postExists = await QueryPostRepo.getPostById(postId)
-    //     if (!postExists) {
-    //         throw new Error('Post not found');
-    //     }
-    //     await PostRepo.deletePost(postId)
-    // }
 }

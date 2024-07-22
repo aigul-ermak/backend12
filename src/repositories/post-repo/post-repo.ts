@@ -4,7 +4,6 @@ import {ObjectId, WithId} from "mongodb";
 import {QueryBlogRepo} from "../blog-repo/query-blog-repo";
 import {PostModel} from "../../models/post";
 import {LikeModel} from "../../models/like";
-import {LikeRepo} from "../like-repo/like-repo";
 import {LIKE_STATUS} from "../../types/like/output";
 
 export class PostRepo {
