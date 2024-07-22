@@ -70,7 +70,7 @@ export class PostController {
 
 
         let likes = await this.likeService.getNewestLikes(post.id);
-        post.newestLikes = likes.length === 0 ? [] : likes.map(like => ({
+        post.extendedLikesInfo.newestLikes = likes.length === 0 ? [] : likes.map(like => ({
             addedAt: like.createdAt,
             userId: like.userId,
             login: like.login,
