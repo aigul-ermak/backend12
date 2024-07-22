@@ -10,13 +10,7 @@ export type OutputItemPostType = {
         likesCount: Number,
         dislikesCount: Number,
         myStatus: string,
-        newestLikes: [
-            {
-                addedAt: string,
-                userId: string,
-                login: string,
-            }
-        ]
+        newestLikes: NewsLike[]
     }
 }
 
